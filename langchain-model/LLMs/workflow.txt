@@ -1,0 +1,6 @@
+
+
+1. Create a llm.py file
+2. from langchain_openai import OpenAI 
+3. from dotenv import load_dotenv
+
