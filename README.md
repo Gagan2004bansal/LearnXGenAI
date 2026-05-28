@@ -53,6 +53,21 @@
         <li>Types of Chain</li>
         <li>Simple Chain</li>
         <li>Sequential Chain</li>
+        <li>Parallel Chain</li>
+        <li>Conditional Chain</li>
+    </ul>
+    <li>LangChain - <span style="color: green">Runnable</span></li>
+    <ul>
+        <li>All about Runnables!</li>
+        <li>Why they exist?</li>
+        <li>Diff b/w Runnable and Chain</li>
+        <li>Types of Runnable</li>
+        <li>RunnableSequence</li>
+        <li>RunnableParallel</li>
+        <li>RunnablePassthrough</li>
+        <li>RunnableLambda</li>
+        <li>RunnableBranch</li>
+        <li>LCEL</li>
     </ul>
 </ol>
 <div>
