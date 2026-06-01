@@ -1,0 +1,6 @@
+Topics to learn about before Transformers :
+    1. RNNs
+    2. LSTM 
+    3. Seq2Seq
+    4. Attention Mechanism 
+    5. Self-Attention Mechanism

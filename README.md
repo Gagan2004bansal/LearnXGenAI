@@ -69,9 +69,56 @@
         <li>RunnableBranch</li>
         <li>LCEL</li>
     </ul>
+    <li>LangChain - <span style="color: green">Document Loader</span></li>
+    <ul>
+        <li>All about Document Loader!</li>
+        <li>Why they exist?</li>
+        <li>Text Loader</li>
+        <li>PyPDF Loader</li>
+        <li>Limitations of PyPDF Loader</li>
+        <li>Directory Loader</li>
+        <li>Load vs Lazy Load</li>
+        <li>Web Based Loader</li>
+        <li>CSV Loader</li>
+        <li>Custom Docuement Loader</li>
+    </ul>
+    <li>LangChain - <span style="color: green">Text Splitters</span></li>
+    <ul>
+        <li>All about Text Splitting!</li>
+        <li>Why they exist?</li>
+        <li>Types of Splitting</li>
+        <li>Length Based</li>
+        <li>Text Structure Based</li>
+        <li>Document Structure Based</li>
+        <li>Semantic Meaning Based</li>
+    </ul>
+    <li>LangChain - <span style="color: green">Vector Stores</span></li>
+    <ul>
+        <li>All about vector stores!</li>
+        <li>Why vector stores?</li>
+        <li>What are vector stores?</li>
+        <li>Vector Store v/s Vector Database</li>
+        <li>Vector Stores in LangChain</li>
+        <li>Chroma Vector Store</li>
+        <li>Semantic Meaning Based</li>
+    </ul>
+    <li>LangChain - <span style="color: green">Retrievers</span></li>
+    <ul>
+        <li>All about Retrivers!</li>
+        <li>Types of Retrievers</li>
+        <li>Wikipedia Retriever</li>
+        <li>Vector Store Retriever</li>
+        <li>MMR - Maximal Marginal Relevance</li>
+        <li>Multi Query Retriever</li>
+        <li>Contextual Compression Retriever</li>
+    </ul>
+    <li>LangChain - <span style="color: green">RAG</span></li>
+    <ul>
+        <li></li>
+    </ul>
 </ol>
 <div>
-    <p style="color: red; font-weight: bold;">As I am learning, List will be update every week</p>
+    <p style="color: red; font-weight: bold;">As I am learning, List will be update every day with new topic's</p>
 </div>
 <hr>
 
