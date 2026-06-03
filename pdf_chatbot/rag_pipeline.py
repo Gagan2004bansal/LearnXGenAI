@@ -31,7 +31,7 @@ def create_chunk(documents):
     return splitter.split_documents(documents)
 
 # Store chunks in Pinecone
-def store_in_pinecone(chunks):
+def store_in_pinecone(chunks, namespace):
     embeddings = GoogleGenerativeAIEmbeddings(
         model="gemini-embedding-2-preview"
     )
@@ -39,33 +39,42 @@ def store_in_pinecone(chunks):
     PineconeVectorStore.from_documents(
         documents=chunks,
         embedding=embeddings,
-        index_name="pdf-chatbot"
+        index_name=PINECONE_INDEX_NAME,
+        namespace=namespace
     )
 
 # Retriever 
-def get_retriever():
+def get_retriever(namespace):
     embeddings = GoogleGenerativeAIEmbeddings(
         model="gemini-embedding-2-preview"
     )
 
     vector_store = PineconeVectorStore(
         index_name=PINECONE_INDEX_NAME,
-        embedding=embeddings
+        embedding=embeddings,
+        namespace=namespace
     )
     
     return vector_store.as_retriever(
         search_kwargs={"k": 5}
     )
 
+# RAG Chain
 def get_rag_chain():
-    retriever = get_retriever()
 
     prompt = PromptTemplate(
-    template="""
-        You are a helpful assistant. Use the following retrieved context to answer the question.
-        If you don't know the answer, say you don't know.
-        Context: {context}
-        Question: {question}
+        template="""
+        You are a helpful assistant.
+
+        Use the following context to answer the question.
+
+        If the answer is not present in the context, say you don't know.
+
+        Context:
+        {context}
+
+        Question:
+        {question}
         """,
         input_variables=["context", "question"],
     )
@@ -75,29 +84,51 @@ def get_rag_chain():
         temperature=0
     )
 
-    chain = (
-        {
-            "context": itemgetter("question") | retriever,
-            "question": itemgetter("question")
-        }
-        | prompt | llm | StrOutputParser()
-    )
+    chain = prompt | llm | StrOutputParser()
 
     return chain
 
+# Format Docs
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
 
-def ask_question(question):
+# Ask question
+def ask_question(question, namespace):
+
+    retriever = get_retriever(namespace)
+
+    docs = retriever.invoke(question)
+
+    context = format_docs(docs)
+
     chain = get_rag_chain()
-    response = chain.invoke({"question": question})
-    return response
 
-if __name__ == "__main__":
+    answer = chain.invoke({
+        "context": context,
+        "question": question
+    })
+
+    sources = []
+
+    for doc in docs:
+        page = doc.metadata.get("page")
+
+        if page is not None:
+            sources.append(f"Page {page + 1}")
+
+    return {
+        "answer": answer,
+        "sources": sorted(list(set(sources)))
+    }
+
+# Testing the pipeline
+# if __name__ == "__main__":
    
-    pdf_path = "data/Gagan_Bansal_CSE26.pdf"
-    documents = load_pdf(pdf_path)
-    chunks = create_chunk(documents)
-    store_in_pinecone(chunks)
+#     pdf_path = "data/Gagan_Bansal_CSE26.pdf"
+#     documents = load_pdf(pdf_path)
+#     chunks = create_chunk(documents)
+#     store_in_pinecone(chunks)
 
-    question = "What is the main topic of the PDF?"
-    answer = ask_question(question)
-    print(answer)
+#     question = "What is the main topic of the PDF?"
+#     answer = ask_question(question)
+#     print(answer)
