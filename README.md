@@ -1,7 +1,51 @@
 # LEARNxGENAI
 
-<h3 style="color: blue; font-weight: bold;">What We Cover Till Now</h3>
-<hr>
+<p align="center">
+  <img src="assets/banner.png" alt="LEARNxGENAI Banner" width="100%">
+</p>
+
+<p align="center">
+  A structured repository documenting my journey of learning and building with Generative AI, LangChain, RAG, Agents, Deep Learning, and modern AI application development.
+</p>
+
+---
+
+## Overview
+
+LEARNxGENAI is a collection of organized notes, code examples, experiments, and mini-projects created while exploring the GenAI ecosystem.
+
+The goal of this repository is to provide practical, implementation-focused learning resources covering everything from foundational AI concepts to production-ready AI systems.
+
+---
+
+## Repository Structure
+
+```text
+LEARNxGENAI
+│
+├── agentic-ai-langGraph
+├── ai-agent
+├── assets
+├── chains
+├── Deep_Learning
+├── langchain-model
+├── mcp-server
+├── output-parser
+├── pdf_chatbot
+├── rag-pipeline
+├── rag-pipeline-project
+├── retrievers
+├── runnables
+├── structured-output
+├── tools
+│
+├── all_topics.md
+└── README.md
+```
+
+--- 
+
+<h2>Topics Covered</h2>
 
 <ol>
     <li>Foundational Model</li>
@@ -114,16 +158,49 @@
     </ul>
     <li>LangChain - <span style="color: green">RAG</span></li>
     <ul>
-        <li></li>
+        <li>RAG Fundamentals</li>
+        <li>RAG Pipeline Architecture</li>
+        <li>Document Processing</li>
+        <li>Retrieval Strategies</li>
+        <li>Generation Workflow</li>
+        <li>End-to-End Implementations</li>
     </ul>
 </ol>
+
+---
+
+<h2>Projects</h2>
+<p>This repository also contains hands-on implementations including:
+    <li>PDF Chatbot
+    <li>RAG Pipeline
+    <li>End-to-End RAG Projects
+    <li>AI Agents
+    <li>LangGraph Workflows
+    <li>MCP Server Experiments
+    <li>Structured Output Systems
+</p>
+
 <div>
     <p style="color: red; font-weight: bold;">As I am learning, List will be update every day with new topic's</p>
 </div>
-<hr>
+
+---
+
+<h2>Upcoming Topics</h2>
+<p>Topics are continuously added as the learning journey progresses. Planned additions include:
+    <li>Advanced RAG
+    <li>Agentic AI Systems
+    <li>Multi-Agent Architectures
+    <li>MCP Ecosystem
+    <li>Evaluation Frameworks
+    <li>Fine-Tuning
+    <li>AI Deployment
+    <li>Production AI Systems
+</p>
 
 <div>
+    <h2>Connect & Support</h2>
     <div>Linkedin : <a href="https://www.linkedin.com/in/bansalgagan2004/" style="text-decoration: underline; color: green">https://www.linkedin.com/in/bansalgagan2004/</a>
     </div>
-    <div>⭐ Star the repo for upcoming notes!</div>
+    <div>⭐ If you find this repository useful, consider giving it a star to support future updates and learning resources.</div>
 </div> 
