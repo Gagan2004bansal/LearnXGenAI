@@ -112,6 +112,10 @@ if question and selected_pdf:
         st.caption(
             f"Sources: {', '.join(result['sources'])}"
         )
+        st.caption(
+            f"Similarity Score: {result['similarity_score']}"
+        )
+        
 
     st.session_state.messages.append({
         "role": "assistant",

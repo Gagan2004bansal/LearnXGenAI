@@ -98,9 +98,25 @@ def format_docs(docs):
 # Ask question
 def ask_question(question, namespace, chat_history):
 
-    retriever = get_retriever(namespace)
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="gemini-embedding-2-preview"
+    )
 
-    docs = retriever.invoke(question)
+    vector_store = PineconeVectorStore(
+        index_name=PINECONE_INDEX_NAME,
+        embedding=embeddings,
+        namespace=namespace
+    )
+
+    results = vector_store.similarity_search_with_score(
+        question,
+        k=5
+    )
+
+    docs = [doc for doc, score in results]
+    scores = [score for doc, score in results]
+
+    avg_score = round(sum(scores) / len(scores), 3)
 
     context = format_docs(docs)
 
@@ -129,7 +145,8 @@ def ask_question(question, namespace, chat_history):
 
     return {
         "answer": answer,
-        "sources": sorted(list(set(sources)))
+        "sources": sorted(list(set(sources))),
+        "similarity_score": avg_score
     }
 
 # Testing the pipeline
