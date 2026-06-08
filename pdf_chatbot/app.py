@@ -5,20 +5,18 @@ from rag_pipeline import (
     load_pdf,
     create_chunk,
     store_in_pinecone,
-    ask_question
+    ask_question,
+    delete_pdf,
+    delete_all_pdfs
 )
 
 # TITLE
-st.title("PDF Chatbot")
+st.title("MULTI PDF Chatbot")
 
 # CHAT HISTORY 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# CLEAR CHAT HISTORY
-if st.button("Clear Chat"):
-    st.session_state.messages = []
-    st.rerun()
 
 # INITIALIZE SESSION STATE
 os.makedirs("data", exist_ok=True)
@@ -50,26 +48,97 @@ if uploaded_file:
         st.rerun()
 
 # DROPDOWN TO SELECT PDF
-selected_pdf = st.selectbox(
-    "Select PDF",
-    options=[None] + pdf_files,
-    format_func=lambda x: "Choose a PDF..." if x is None else x
+selected_pdfs = st.multiselect(
+    "Select PDF(s)",
+    options=pdf_files
 )
+
+# SEARCH ALL PDFS
+search_all = st.checkbox(
+    "Search All PDFs"
+)
+
+if search_all:
+    selected_pdfs = pdf_files
 
 # TRACK CURRENT PDF
 if "current_pdf" not in st.session_state:
     st.session_state.current_pdf = None
 
 # CLEAR CHAT IF PDF CHANGES
-if ( selected_pdf and selected_pdf != st.session_state.current_pdf ):
+current_selection = tuple(
+    sorted(selected_pdfs)
+)
+
+if "current_pdfs" not in st.session_state:
+    st.session_state.current_pdfs = ()
+
+if current_selection != st.session_state.current_pdfs:
 
     st.session_state.messages = []
 
-    st.session_state.current_pdf = selected_pdf
+    st.session_state.current_pdfs = current_selection
 
-if selected_pdf:
-    st.info(f"Currently querying: {selected_pdf}")
 
+if search_all:
+    st.info("Currently querying: All PDFs")
+if selected_pdfs:
+    st.info(
+        f"Currently querying: {', '.join(selected_pdfs)}"
+    )
+
+
+# DELETE PDF FROM PINECONE AND LOCAL STORAGE
+if len(selected_pdfs) == 1:
+
+    selected_pdf = selected_pdfs[0]
+
+    if st.button(
+        f"Delete {selected_pdf}"
+    ):
+
+        delete_pdf(selected_pdf)
+
+        file_path = os.path.join(
+            "data",
+            selected_pdf
+        )
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        st.success(
+            f"{selected_pdf} deleted"
+        )
+
+        st.rerun()
+
+## DELETE BUTTON 
+if st.button(
+    "Delete All PDFs"
+):
+
+    delete_all_pdfs()
+
+    for pdf in pdf_files:
+
+        os.remove(
+            os.path.join(
+                "data",
+                pdf
+            )
+        )
+
+    st.success(
+        "All PDFs deleted"
+    )
+
+    st.rerun()
+
+# CLEAR CHAT HISTORY BUTTON
+if st.button("Clear Chat"):
+    st.session_state.messages = []
+    st.rerun()
 
 # INPUT BOX FOR QUERY
 for msg in st.session_state.messages:
@@ -78,7 +147,7 @@ for msg in st.session_state.messages:
         st.write(msg["content"])
 
     
-if selected_pdf:
+if selected_pdfs:
     question = st.chat_input(
         "Ask a question"
     )
@@ -89,7 +158,7 @@ else:
     )
 
 
-if question and selected_pdf:
+if question and selected_pdfs:
 
     st.session_state.messages.append({
         "role": "user",
@@ -102,7 +171,7 @@ if question and selected_pdf:
     with st.spinner("Searching PDF and generating answer..."):
         result = ask_question(
             question, 
-            selected_pdf,
+            selected_pdfs,
             st.session_state.messages
         )
 
@@ -110,10 +179,7 @@ if question and selected_pdf:
         st.write(result["answer"])
 
         st.caption(
-            f"Sources: {', '.join(result['sources'])}"
-        )
-        st.caption(
-            f"Similarity Score: {result['similarity_score']}"
+            f"Sources: {', '.join(result['sources'])}, Similarity Score: {result['similarity_score']}, Answer found in {result['relevant_sections']} relevant sections of the document."
         )
         
 

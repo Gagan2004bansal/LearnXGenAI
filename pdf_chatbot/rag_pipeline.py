@@ -9,6 +9,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 
+from pinecone import Pinecone
+
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -36,12 +38,55 @@ def store_in_pinecone(chunks, namespace):
         model="gemini-embedding-2-preview"
     )
 
+    for chunk in chunks:
+        chunk.metadata["pdf_name"] = namespace
+
     PineconeVectorStore.from_documents(
         documents=chunks,
         embedding=embeddings,
         index_name=PINECONE_INDEX_NAME,
         namespace=namespace
     )
+
+# DELETE NAMESPACE FROM PINECONE 
+def delete_pdf(namespace):
+
+    pc = Pinecone(
+        api_key=PINECONE_API_KEY
+    )
+
+    index = pc.Index(
+        PINECONE_INDEX_NAME
+    )
+
+    index.delete(
+        delete_all=True,
+        namespace=namespace
+    )
+
+def delete_all_pdfs():
+
+    pc = Pinecone(
+        api_key=PINECONE_API_KEY
+    )
+
+    index = pc.Index(
+        PINECONE_INDEX_NAME
+    )
+
+    stats = index.describe_index_stats()
+
+    namespaces = (
+        stats.get("namespaces", {})
+        .keys()
+    )
+
+    for namespace in namespaces:
+
+        index.delete(
+            delete_all=True,
+            namespace=namespace
+        )
 
 # Retriever 
 def get_retriever(namespace):
@@ -68,7 +113,12 @@ def get_rag_chain():
 
         Use the following context to answer the question.
 
-        If the answer is not present in the context, say you don't know.
+        If the answer cannot be found in the context,
+        respond with:
+
+        "I could not find this information in the uploaded PDF."
+
+        Do not use external knowledge.
 
         Chat History:
         {chat_history}
@@ -96,27 +146,40 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 # Ask question
-def ask_question(question, namespace, chat_history):
+def ask_question(question, namespaces, chat_history):
 
     embeddings = GoogleGenerativeAIEmbeddings(
         model="gemini-embedding-2-preview"
     )
 
-    vector_store = PineconeVectorStore(
-        index_name=PINECONE_INDEX_NAME,
-        embedding=embeddings,
-        namespace=namespace
+    all_results = []
+
+    for namespace in namespaces:
+        vector_store = PineconeVectorStore(
+            index_name=PINECONE_INDEX_NAME,
+            embedding=embeddings,
+            namespace=namespace
+        )
+        results = vector_store.similarity_search_with_score(
+            question,
+            k=5
+        )
+        all_results.extend(results)
+
+    all_results.sort(
+        key=lambda x: x[1]
     )
 
-    results = vector_store.similarity_search_with_score(
-        question,
-        k=5
+    all_results = all_results[:5]
+    docs = [doc for doc, score in all_results]
+    scores = [score for doc, score in all_results]
+    relevant_sections = len(docs)
+
+    avg_score = (
+        round(sum(scores) / len(scores), 3)
+        if scores
+        else 0
     )
-
-    docs = [doc for doc, score in results]
-    scores = [score for doc, score in results]
-
-    avg_score = round(sum(scores) / len(scores), 3)
 
     context = format_docs(docs)
 
@@ -138,15 +201,21 @@ def ask_question(question, namespace, chat_history):
     sources = []
 
     for doc in docs:
+        pdf_name = doc.metadata.get(
+            "pdf_name",
+            "Unknown PDF"
+        )
         page = doc.metadata.get("page")
-
         if page is not None:
-            sources.append(f"Page {page + 1}")
+            sources.append(
+                f"{pdf_name} | Page {page + 1}"
+            )
 
     return {
         "answer": answer,
         "sources": sorted(list(set(sources))),
-        "similarity_score": avg_score
+        "similarity_score": avg_score,
+        "relevant_sections": relevant_sections
     }
 
 # Testing the pipeline
