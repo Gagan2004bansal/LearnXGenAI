@@ -11,6 +11,14 @@ from rag_pipeline import (
 # TITLE
 st.title("PDF Chatbot")
 
+# CHAT HISTORY 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# CLEAR CHAT HISTORY
+if st.button("Clear Chat"):
+    st.session_state.messages = []
+    st.rerun()
 
 # INITIALIZE SESSION STATE
 os.makedirs("data", exist_ok=True)
@@ -48,30 +56,66 @@ selected_pdf = st.selectbox(
     format_func=lambda x: "Choose a PDF..." if x is None else x
 )
 
+# TRACK CURRENT PDF
+if "current_pdf" not in st.session_state:
+    st.session_state.current_pdf = None
+
+# CLEAR CHAT IF PDF CHANGES
+if ( selected_pdf and selected_pdf != st.session_state.current_pdf ):
+
+    st.session_state.messages = []
+
+    st.session_state.current_pdf = selected_pdf
+
 if selected_pdf:
     st.info(f"Currently querying: {selected_pdf}")
 
 
 # INPUT BOX FOR QUERY
+for msg in st.session_state.messages:
+
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
+    
 if selected_pdf:
-    question = st.text_input("Ask Question")
+    question = st.chat_input(
+        "Ask a question"
+    )
 else:
     question = st.text_input(
         "Select a PDF first",
         disabled=True
     )
 
+
 if question and selected_pdf:
+
+    st.session_state.messages.append({
+        "role": "user",
+        "content": question
+    })
+
+    with st.chat_message("user"):
+        st.write(question)
 
     with st.spinner("Searching PDF and generating answer..."):
         result = ask_question(
             question, 
-            selected_pdf
+            selected_pdf,
+            st.session_state.messages
         )
 
-    st.write("### Answer")
-    st.write(result["answer"])
+    with st.chat_message("assistant"):
+        st.write(result["answer"])
 
-    st.caption(
-        f"Sources: {', '.join(result['sources'])}"
-    )
+        st.caption(
+            f"Sources: {', '.join(result['sources'])}"
+        )
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": result["answer"]
+    })
+
+    

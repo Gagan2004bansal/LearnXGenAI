@@ -70,13 +70,16 @@ def get_rag_chain():
 
         If the answer is not present in the context, say you don't know.
 
+        Chat History:
+        {chat_history}
+
         Context:
         {context}
 
         Question:
         {question}
         """,
-        input_variables=["context", "question"],
+        input_variables=["context", "question", "chat_history"],
     )
 
     llm = ChatGoogleGenerativeAI(
@@ -93,7 +96,7 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 # Ask question
-def ask_question(question, namespace):
+def ask_question(question, namespace, chat_history):
 
     retriever = get_retriever(namespace)
 
@@ -101,9 +104,17 @@ def ask_question(question, namespace):
 
     context = format_docs(docs)
 
+    history_text = "\n".join(
+        [
+            f"{msg['role']}: {msg['content']}"
+            for msg in chat_history
+        ]
+    )
+
     chain = get_rag_chain()
 
     answer = chain.invoke({
+        "chat_history": history_text,
         "context": context,
         "question": question
     })
