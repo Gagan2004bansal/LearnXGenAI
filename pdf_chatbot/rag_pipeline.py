@@ -88,22 +88,6 @@ def delete_all_pdfs():
             namespace=namespace
         )
 
-# Retriever 
-def get_retriever(namespace):
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-2-preview"
-    )
-
-    vector_store = PineconeVectorStore(
-        index_name=PINECONE_INDEX_NAME,
-        embedding=embeddings,
-        namespace=namespace
-    )
-    
-    return vector_store.as_retriever(
-        search_kwargs={"k": 5}
-    )
-
 # RAG Chain
 def get_rag_chain():
 
